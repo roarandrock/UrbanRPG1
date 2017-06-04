@@ -15,50 +15,55 @@ func ErrorCheck(err error) {
 
 //GameEndCheck checks for end conditions
 func GameEndCheck() bool {
-	cont := true
+	cont := goalAchievedCheck()
 	_, cw := models.GetTime()
-	if cw[0] >= 3 {
+	if cw[0] >= 4 {
 		cont = false
 	}
 	return cont
 }
 
-//StatZeroCheck checks if a stat is zero
+func goalAchievedCheck() bool {
+	cont := true
+	pg := models.GetGoals()
+	pstats := models.GetPlayerStats()
+	ptraits := models.GetPlayerTraits()
+	if pstats.Connections == pg.MinStats.Connections { //make a compare stats function
+		cont = false //need victory text written for each goal
+	}
+	if ptraits.Income == pg.MinTraits.Income {
+		cont = false
+	}
+	if ptraits.Independence == pg.MinTraits.Independence {
+		cont = false
+	}
+	if cont == false {
+		fmt.Println(pg.Victory)
+	}
+	return cont
+}
+
+//StatZeroCheck checks if a vital stat is zero
 func StatZeroCheck() bool {
 	cont := true
-	nps := models.GetPlayerStats()
-	if nps.Beauty == 0 {
-		fmt.Println("You have no beauty.")
-	}
-	if nps.Brands == 0 {
-		fmt.Println("You have no brands.")
-	}
-	if nps.Connections == 0 {
-		fmt.Println("You have no connections.")
-	}
-	if nps.Energy == 0 {
+
+	cpt := models.GetPlayerTraits()
+	cpm := models.GetPlayerMeters()
+	//fmt.Println("test, indp", cpt.Independence, cpt)
+	if cpm.Energy == 0 {
 		fmt.Println("You have no energy.")
+		fmt.Println("You pass out, unconcious.")
+		cd, cw := models.GetFutureTime(1)
+		models.UpdateSchedPerTime(cd, cw, 0)
+		cd, cw = models.GetFutureTime(2)
+		models.UpdateSchedPerTime(cd, cw, 0)
+		models.GetenSetSchedEvent("You went too far, too hard. Need rest.")
+		cpm.Energy = 20
 	}
-	if nps.Experience == 0 {
-		fmt.Println("You have no experience.")
+	if cpt.Independence == 0 {
+		fmt.Println("You have no independence. Game over.")
+		cont = false
 	}
-	if nps.Income == 0 {
-		fmt.Println("You have no income.")
-	}
-	if nps.Independence == 0 {
-		fmt.Println("You have no independence.")
-	}
-	if nps.Knowledge == 0 {
-		fmt.Println("You have no knowledge")
-	}
-	if nps.Smooth == 0 {
-		fmt.Println("You have no smooth.")
-	}
-	if nps.Stress == 0 {
-		fmt.Println("You have no stress.")
-	}
-	if nps.Stuff == 0 {
-		fmt.Println("You have no stuff.")
-	}
+	models.UpdatePlayerMeters(cpm)
 	return cont
 }

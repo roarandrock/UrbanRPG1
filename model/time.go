@@ -15,10 +15,35 @@ Day = 0 Morning- 6 dawn
 
 var currentweek = []int{1, 0}
 var currentday = []int{1, 0}
+var exportweek = []int{0, 0}
+var exportday = []int{0, 0}
+
+func localTime() ([]int, []int) {
+	exportday = currentday
+	exportweek = currentweek
+	return exportday, exportweek
+}
 
 //GetTime returns time
 func GetTime() ([]int, []int) {
-	return currentday, currentweek
+	cd, cw := localTime()
+	return cd, cw
+}
+
+func GetFutureTime(n int) ([]int, []int) {
+	cd := []int{0, 0}
+	newd, cw := GetTime()
+	cd[1] = newd[1] + n
+	if cd[1] > 5 {
+		cd[0]++
+		cd[1] = 0
+		cw[1]++
+		if cw[1] > 1 {
+			cw[0]++
+			cw[1] = 0
+		}
+	}
+	return cd, cw
 }
 
 //UpdateTimeofDay moves the day along

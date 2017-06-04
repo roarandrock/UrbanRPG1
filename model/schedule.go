@@ -42,6 +42,10 @@ var (
 	we6 = 1
 )
 
+var (
+	sevent0 = "Getting ready for work."
+)
+
 //SetSchedule takes in new schedule
 func SetSchedule(newsc []int) {
 	//can make a check then return error
@@ -70,4 +74,24 @@ func GetSched() []int {
 	exports := []int{wd0, wd1, wd2, wd3, wd4, wd5, wd6,
 		we0, we1, we2, we3, we4, we5, we6}
 	return exports
+}
+
+func GetenSetSchedEvent(newM string) string {
+	export := sevent0
+	if newM != "" {
+		sevent0 = newM
+	}
+	return export
+}
+
+func UpdateSchedPerTime(cd []int, cw []int, nSch int) {
+	oldSch := GetSched() //do we need a temp schedule for busy events?
+	//fmt.Println("Test old:", oldSch)
+	if cw[1] == 0 { //weekday
+		oldSch[cd[1]] = nSch
+	} else if cw[1] == 1 { //weekend
+		oldSch[cd[1]+7] = nSch
+	}
+	SetSchedule(oldSch)
+	//fmt.Println("Test new:", GetSched())
 }

@@ -5,6 +5,7 @@ import (
 	"UrbanRPG1/check"
 	"UrbanRPG1/inputs"
 	"UrbanRPG1/model"
+	"UrbanRPG1/narrative"
 	"fmt"
 	"strconv"
 )
@@ -26,40 +27,38 @@ func MainFlow() error {
 
 func starterFlow() (bool, error) {
 	var cont bool
+	_, err := strconv.Atoi("-42") //error cheat
 	fmt.Println("Do you want to play a game?")
 	r1 := inputs.StringarrayInput([]string{"Yes", "No"})
 	if r1 == 1 {
 		cont = true
 	} else {
 		cont = false
+		return cont, err
 	}
+	narrative.Intro()
 	models.SetJorb() //setting up job board
 	models.SetPlayerAll()
+	//setting up city
+	models.SetCity()
 	//setting up player based on jorb, should be a separate function
-	_, cpStats, _ := models.GetCurrentPlayer()
-	//fixed
-	cpStats.Income = models.GetJorb().Impact.Income
-	models.UpdatePlayerStats(cpStats)
-//Cumulative //need to finish this 
-cpStats.Energy =
-cpStats.Connections  int
-cpStats.Independence int
-cpStats.Knowledge    int
-cpStats.Experience   int
-cpStats.Smooth       int
-cpStats.Stress       int
-cpStats.Income       int
-//update all
-models.StatChange(cpStats)
+	//traits
+	cpt := models.GetPlayerTraits()
+	cpt.Income = models.GetJorb().Impact.ImpactTraits.Income
+	cpt.Independence = models.GetJorb().Impact.ImpactTraits.Independence
+	models.TraitChange(cpt)
+	//Stats
+	models.StatChange(models.GetJorb().Impact.ImpactStats)
+	//Meters are on a daily basis
+	//update all
 	//setting schedule for job, needs to be implemented when changing jobs
-	s1 := models.GetJorb().Schedule
-	models.SetSchedule(s1)
-	_, err := strconv.Atoi("-42") //error cheat
+	models.SetSchedule(models.GetJorb().Schedule)
+
 	return cont, err
 }
 
 func gameLoopFlow() (bool, error) {
-	//cont := true // pointless? Redudnant with game end check
+
 	//normal day loop
 	dayFlowLoop()
 	_, err := strconv.Atoi("-42") //error cheat
@@ -70,38 +69,56 @@ func gameLoopFlow() (bool, error) {
 func dayFlowLoop() {
 	models.ShowTime() //test
 	//job check, schedule check, actions at time check
+	//cpm := models.GetPlayerMeters()
+	//cpt := models.GetPlayerTraits()
+	//fmt.Println("Test energy", cpm.Energy)
+	//fmt.Println("Test independence", cpt.Independence, cpt)
 	//models.GetJorb(), passes
-	workSchedule() //change this to a time checker - what time, what is happenig?
-	//models.ShowPlayerStats() //make a delta stat display?
+	//new way
+	getChoices()
 	check.StatZeroCheck()
-	models.UpdateTimeofDay() //based on schedule
+	models.UpdateTimeofDay() //moves forward fixed amount
 	endOfWeek()
 }
 
-//WorkSchedule looks at job and time of day
-func workSchedule() {
+func getChoices() {
+	//check schedule/time events
 	cd, cw := models.GetTime()
-	//fmt.Println("For test:", cd, cw)
-	sched := models.GetSched()
+	csched := models.GetSched()
 	actiontype := 1 //default, free time
+	options := []string{}
+	m1 := 1
 	//fmt.Println("Test schedule", sched)
 	switch cw[1] {
 	case 0: //weekdays
-		actiontype = sched[cd[1]]
+		actiontype = csched[cd[1]]
 	case 1: //weekends
-		actiontype = sched[cd[1]+7]
+		actiontype = csched[cd[1]+7]
 	}
-	//fmt.Println("Test:", actiontype)
+	//work or free
 	switch actiontype {
-	case 0:
-		fmt.Println("You're busy.")
-		//need to include the reason why
-		fmt.Println("You have to get ready and go to work.")
-		inputs.StringarrayInput([]string{"Bummer"})
+	case 0: //booked
+		fmt.Println(models.GetenSetSchedEvent("Busy getting ready for work."))
+		options = []string{"OK", "Bummer"}
+	case 1: //free
+		options, m1 = action.FreeTimeActions() //implement basic menu now
+	case 2: //work
+		options = action.WorkActions()
+	}
+	//stats events
+	//options = append...
+	//location events
+	if actiontype == 1 {
+		cd := models.DistrictGetByLoc(models.GetPlayerLoc())
+		fmt.Println("You are in:", cd.Name)
+	}
+	//display options
+	r1 := inputs.StringarrayInput(options)
+	switch actiontype {
 	case 1:
-		action.FreeTimeActions()
+		action.FreeTimeOutcomes(options[r1-1], m1) //what to do with more options? Need to handle dynamic options
 	case 2:
-		action.WorkActions()
+		action.WorkOutcomes(options[r1-1])
 	}
 }
 

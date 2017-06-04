@@ -6,6 +6,11 @@ import "fmt"
 Stats are what you have
 Traits are what you are
 Base Struct is where you are
+
+need to seperate stats into:
+Cumulative (like knowledge and experience, gain over time) stat
+Set (like income, always at a level per job, indepedence too) trait
+Swing (changing daily like energy, hygience, stress) meters
 */
 
 //Player is base struct
@@ -15,47 +20,65 @@ type Player struct {
 	Loc    int
 }
 
-//PlayerStats keeps track of stats, 1-5 scale or 100?, 11
 type PlayerStats struct {
-	Income       int
-	Connections  int //trait?
-	Independence int //should be a trait?
-	Stuff        int
-	Brands       int
-	Knowledge    int
-	Experience   int
-	Energy       int
-	Beauty       int
-	Smooth       int
-	Stress       int
+	Connections int
+	Stuff       int
+	Brands      int
+	Knowledge   int
+	Experience  int
 }
 
-//PlayerTraits tracks traits
+type PlayerMeters struct {
+	Hygiene int
+	Soul    int
+	Energy  int
+	Stress  int
+}
+
 type PlayerTraits struct {
-	Education  int
-	Hygiene    int //should be a stat?
-	Soul       int
-	Alcoholism int
-	Persuasive int
-	Lucky      int
-	Arrogant   int
+	Income       int
+	Independence int
+	Education    int
+	Alcoholism   int
+	Lucky        int
+	Beauty       int
+	Smooth       int
 }
 
 var currentPlayer Player
 var currentPlayerStats PlayerStats
 var currentPlayerTraits PlayerTraits
+var currentPlayerMeters PlayerMeters
 
 //GetCurrentPlayer returns current player struct
-func GetCurrentPlayer() (Player, PlayerStats, PlayerTraits) {
-	return currentPlayer, currentPlayerStats, currentPlayerTraits
+func GetCurrentPlayer() Player {
+	return currentPlayer
 }
 
+//GetPlayerStats returns stats
 func GetPlayerStats() PlayerStats {
 	return currentPlayerStats
 }
 
+//UpdatePlayerStats updates stats
 func UpdatePlayerStats(cps PlayerStats) {
 	currentPlayerStats = cps
+}
+
+func GetPlayerMeters() PlayerMeters {
+	return currentPlayerMeters
+}
+
+func UpdatePlayerMeters(cps PlayerMeters) {
+	currentPlayerMeters = cps
+}
+
+func GetPlayerTraits() PlayerTraits {
+	return currentPlayerTraits
+}
+
+func UpdatePlayerTraits(cps PlayerTraits) {
+	currentPlayerTraits = cps
 }
 
 //GetPlayerLoc returns the locations as an int
@@ -68,37 +91,39 @@ func UpdateCurrentPlayer(np Player) {
 	currentPlayer = np
 }
 
-//SetPlayerAll sets initial stats
+//SetPlayerAll sets initial stats, assuming no jorb
 func SetPlayerAll() {
 	currentPlayer.Name = "Ready"
 	currentPlayer.Height = 68
 	currentPlayer.Loc = 1
-	currentPlayerStats.Income = 1 //determined by job
+	//stats
+	currentPlayerStats.Stuff = 0
+	currentPlayerStats.Brands = 20
+	currentPlayerStats.Knowledge = 20
+	currentPlayerStats.Experience = 0
 	currentPlayerStats.Connections = 10
-	currentPlayerStats.Independence = 80
-	currentPlayerStats.Stuff = 1
-	currentPlayerStats.Brands = 30
-	currentPlayerStats.Knowledge = 30
-	currentPlayerStats.Experience = 1
-	currentPlayerStats.Energy = 50
-	currentPlayerStats.Beauty = 50
-	currentPlayerStats.Smooth = 20
-	currentPlayerStats.Stress = 20
+	//traits
+	currentPlayerTraits.Alcoholism = 40
+	currentPlayerTraits.Beauty = 50
+	currentPlayerTraits.Education = 50
+	currentPlayerTraits.Income = 0
+	currentPlayerTraits.Independence = 100
+	currentPlayerTraits.Lucky = 20
+	currentPlayerTraits.Smooth = 20
+	//meters
+	currentPlayerMeters.Energy = 100
+	currentPlayerMeters.Hygiene = 50
+	currentPlayerMeters.Soul = 50
+	currentPlayerMeters.Stress = 10
 }
 
 //ShowPlayerStats displays all stats
 func ShowPlayerStats() {
-	fmt.Println("Income:", currentPlayerStats.Income)
 	fmt.Println("Connections: ", currentPlayerStats.Connections)
-	fmt.Println("Independence: ", currentPlayerStats.Independence)
 	fmt.Println("Stuff: ", currentPlayerStats.Stuff)
 	fmt.Println("Brands: ", currentPlayerStats.Brands)
 	fmt.Println("Knowledge: ", currentPlayerStats.Knowledge)
 	fmt.Println("Experience: ", currentPlayerStats.Experience)
-	fmt.Println("Energy: ", currentPlayerStats.Energy)
-	fmt.Println("Beauty: ", currentPlayerStats.Beauty)
-	fmt.Println("Smooth: ", currentPlayerStats.Smooth)
-	fmt.Println("Stress: ", currentPlayerStats.Stress)
 }
 
 //DeltaStat returns updated stat
@@ -117,55 +142,109 @@ func DeltaStat(olds int, news int) int {
 
 //StatChange implements deltastats
 func StatChange(nps PlayerStats) {
-	//updates stats, prints delta stats (can be a separate function)
-	//would it be easier if stats were mapped and tagged? Or just array - 0 is beauty, 10 is stuff
 	cps := GetPlayerStats()
-
-	cps.Beauty = DeltaStat(cps.Beauty, nps.Beauty)
 	cps.Brands = DeltaStat(cps.Brands, nps.Brands)
 	cps.Connections = DeltaStat(cps.Connections, nps.Connections)
-	cps.Energy = DeltaStat(cps.Energy, nps.Energy)
 	cps.Experience = DeltaStat(cps.Experience, nps.Experience)
-	cps.Income = DeltaStat(cps.Income, nps.Income)
-	cps.Independence = DeltaStat(cps.Independence, nps.Independence)
 	cps.Knowledge = DeltaStat(cps.Knowledge, nps.Knowledge)
-	cps.Smooth = DeltaStat(cps.Smooth, nps.Knowledge)
-	cps.Stress = DeltaStat(cps.Stress, nps.Stress)
 	cps.Stuff = DeltaStat(cps.Stuff, nps.Stuff)
-
-	if nps.Beauty != 0 {
-		fmt.Println("Beauty:", cps.Beauty)
-	}
 	if nps.Brands != 0 {
 		fmt.Println("Brands:", cps.Brands)
 	}
 	if nps.Connections != 0 {
 		fmt.Println("Connections:", cps.Connections)
 	}
-	if nps.Energy != 0 {
-		fmt.Println("Energy:", cps.Energy)
-	}
 	if nps.Experience != 0 {
 		fmt.Println("Experience:", cps.Experience)
-	}
-	if nps.Income != 0 {
-		fmt.Println("Income:", cps.Income)
-	}
-	if nps.Independence != 0 {
-		fmt.Println("Independence:", cps.Independence)
 	}
 	if nps.Knowledge != 0 {
 		fmt.Println("Knowledge:", cps.Knowledge)
 	}
+	if nps.Stuff != 0 {
+		fmt.Println("Stuff:", cps.Stuff)
+	}
+	UpdatePlayerStats(cps)
+}
+
+//TraitChange implements deltaTraits
+//traits are set, not cumulative
+func TraitChange(nps PlayerTraits) {
+	cps := GetPlayerTraits()
+
+	if nps.Alcoholism != 0 {
+		cps.Alcoholism = nps.Alcoholism
+		fmt.Println("Alcoholism:", cps.Alcoholism)
+	}
+	if nps.Beauty != 0 {
+		cps.Beauty = nps.Beauty
+		fmt.Println("Beauty:", cps.Beauty)
+	}
+	if nps.Education != 0 {
+		cps.Education = nps.Education
+		fmt.Println("Education:", cps.Education)
+	}
+	if nps.Income != 0 {
+		cps.Income = nps.Income
+		fmt.Println("Income:", cps.Income)
+	}
+	if nps.Independence != 0 {
+		cps.Independence = nps.Independence
+		fmt.Println("Independence:", cps.Independence)
+	}
+	if nps.Lucky != 0 {
+		cps.Lucky = nps.Lucky
+		fmt.Println("Lucky:", cps.Lucky)
+	}
 	if nps.Smooth != 0 {
+		cps.Smooth = nps.Smooth
 		fmt.Println("Smooth:", cps.Smooth)
+	}
+	UpdatePlayerTraits(cps)
+}
+
+//MeterChange implements deltaMeters
+func MeterChange(nps PlayerMeters) {
+	cps := GetPlayerMeters()
+	//fmt.Println("Testing meter change 1:", nps.Energy)
+	cps.Energy = DeltaStat(cps.Energy, nps.Energy)
+	cps.Hygiene = DeltaStat(cps.Hygiene, nps.Hygiene)
+	cps.Soul = DeltaStat(cps.Soul, nps.Soul)
+	cps.Stress = DeltaStat(cps.Stress, nps.Stress)
+
+	if nps.Energy != 0 {
+		fmt.Println("Energy:", cps.Energy)
+	}
+	if nps.Hygiene != 0 {
+		fmt.Println("Hygiene:", cps.Hygiene)
+	}
+	if nps.Soul != 0 {
+		fmt.Println("Soul:", cps.Soul)
 	}
 	if nps.Stress != 0 {
 		fmt.Println("Stress:", cps.Stress)
 	}
-	if nps.Stuff != 0 {
-		fmt.Println("Stuff:", cps.Stuff)
-	}
+	//fmt.Println("Testing meter change 2:", cps.Energy)
+	UpdatePlayerMeters(cps)
+}
 
-	UpdatePlayerStats(cps)
+func MinMeterCheck(minm PlayerMeters) bool {
+	cpm := GetPlayerMeters()
+	cont := true
+	if cpm.Energy <= minm.Energy {
+		cont = false
+		fmt.Println("You don't have the energy.")
+		//fmt.Println("Test: action meters,player meters", minm.Energy, cpm.Energy)
+	}
+	return cont
+}
+
+func MinTraitCheck(mint PlayerTraits) bool {
+	cpt := GetPlayerTraits()
+	cont := true
+	if cpt.Income <= mint.Income {
+		cont = false
+		fmt.Println("You cannot afford this place.")
+		//fmt.Println("Test: action meters,player meters", minm.Energy, cpm.Energy)
+	}
+	return cont
 }

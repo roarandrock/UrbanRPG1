@@ -10,7 +10,7 @@ Morning, Daytime, Evening, Night, Midnight, Dawn
 
 Both split into arrays
 Week = 0 weekday, 1 weekend
-Day = 0 Morning- 6 dawn
+Day = 0 Morning- 5 dawn
 Weekday, weekend
 Morning, Daytime, Evening, Night, Midnight, Dawn
 
@@ -32,14 +32,12 @@ var (
 	wd3 = 1
 	wd4 = 1
 	wd5 = 1
-	wd6 = 1
 	we0 = 1
 	we1 = 1
 	we2 = 1
 	we3 = 1
 	we4 = 1
 	we5 = 1
-	we6 = 1
 )
 
 var (
@@ -49,7 +47,7 @@ var (
 //SetSchedule takes in new schedule
 func SetSchedule(newsc []int) {
 	//can make a check then return error
-	if len(newsc) != 14 {
+	if len(newsc) != 12 {
 		fmt.Println("Schedule error, wrong size", len(newsc))
 		return
 	}
@@ -59,20 +57,18 @@ func SetSchedule(newsc []int) {
 	wd3 = newsc[3]
 	wd4 = newsc[4]
 	wd5 = newsc[5]
-	wd6 = newsc[6] //separate weekday and weekend schedule?
-	we0 = newsc[7]
-	we1 = newsc[8]
-	we2 = newsc[9]
-	we3 = newsc[10]
-	we4 = newsc[11]
-	we5 = newsc[12]
-	we6 = newsc[13]
+	we0 = newsc[6]
+	we1 = newsc[7]
+	we2 = newsc[8]
+	we3 = newsc[9]
+	we4 = newsc[10]
+	we5 = newsc[11]
 }
 
 //GetSched returns current schedule
 func GetSched() []int {
-	exports := []int{wd0, wd1, wd2, wd3, wd4, wd5, wd6,
-		we0, we1, we2, we3, we4, we5, we6}
+	exports := []int{wd0, wd1, wd2, wd3, wd4, wd5,
+		we0, we1, we2, we3, we4, we5}
 	return exports
 }
 
@@ -90,7 +86,7 @@ func UpdateSchedPerTime(cd []int, cw []int, nSch int) {
 	if cw[1] == 0 { //weekday
 		oldSch[cd[1]] = nSch
 	} else if cw[1] == 1 { //weekend
-		oldSch[cd[1]+7] = nSch
+		oldSch[cd[1]+6] = nSch
 	}
 	SetSchedule(oldSch)
 	//fmt.Println("Test new:", GetSched())

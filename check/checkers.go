@@ -17,7 +17,7 @@ func ErrorCheck(err error) {
 func GameEndCheck() bool {
 	cont := goalAchievedCheck()
 	_, cw := models.GetTime()
-	if cw[0] >= 4 {
+	if cw[0] >= 10 {
 		cont = false
 	}
 	return cont
@@ -46,24 +46,54 @@ func goalAchievedCheck() bool {
 //StatZeroCheck checks if a vital stat is zero
 func StatZeroCheck() bool {
 	cont := true
-
 	cpt := models.GetPlayerTraits()
 	cpm := models.GetPlayerMeters()
 	//fmt.Println("test, indp", cpt.Independence, cpt)
-	if cpm.Energy == 0 {
+	if cpm.Energy <= 0 {
 		fmt.Println("You have no energy.")
 		fmt.Println("You pass out, unconcious.")
 		cd, cw := models.GetFutureTime(1)
 		models.UpdateSchedPerTime(cd, cw, 0)
-		cd, cw = models.GetFutureTime(2)
-		models.UpdateSchedPerTime(cd, cw, 0)
 		models.GetenSetSchedEvent("You went too far, too hard. Need rest.")
-		cpm.Energy = 20
+		cpm.Energy = 50
 	}
-	if cpt.Independence == 0 {
+	if cpm.Stress >= 100 {
+		fmt.Println("You are so stressed you suffer a breakdown.")
+		cd, cw := models.GetFutureTime(1)
+		models.UpdateSchedPerTime(cd, cw, 0)
+		models.GetenSetSchedEvent("You need time to recover.")
+		cpm.Stress = 1
+	}
+	if cpm.Hygiene <= 0 {
+		fmt.Println("You are a filthy animal. You are quarantined in your apartment.")
+		cd, cw := models.GetFutureTime(1)
+		models.UpdateSchedPerTime(cd, cw, 0)
+		models.GetenSetSchedEvent("You need extra time to clean yourself. So dirty.")
+		cpm.Hygiene = 5
+	}
+	if cpt.Independence <= 0 {
 		fmt.Println("You have no independence. Game over.")
 		cont = false
 	}
 	models.UpdatePlayerMeters(cpm)
 	return cont
+}
+
+func EventLocationCheck() bool {
+	cont := false
+	eventList := models.EventGetByLoc(models.GetPlayerLoc())
+	if len(eventList) != 0 {
+		cont = true
+		fmt.Println("Test, there are events here:", eventList)
+	}
+	return cont
+}
+
+func UnemployedCheck() bool {
+	check1 := false
+	cp := models.GetCurrentPlayer()
+	if cp.CurJorb.Title == "Unemployed" {
+		check1 = true
+	}
+	return check1
 }

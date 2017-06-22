@@ -8,7 +8,7 @@ import (
 
 //WorkActions chooses actions at work
 func WorkActions() []string {
-	cj := models.GetJorb()
+	cj := models.GetCurJorb()
 	fmt.Println("You go to work at ", cj.CompanyName)
 	wtlist := []workTimeAct{work, sleep1} //need a function for this
 	options := []string{}
@@ -28,14 +28,15 @@ func WorkOutcomes(choption string) {
 			wtchosen = v
 		}
 	}
-
-	//fmt.Println("Test Work Outcomes 1:", wtchosen)
-	//fmt.Println("Test work outcomes 2:", models.GetJorb().Impact.ImpactMeters)
-
 	models.MeterChange(wtchosen.deltameters)
 	chance1 := Brng(100) //different function
 	if chance1 <= wtchosen.firedchance {
-		fmt.Println("You're fired!") //no impact, needs to change jorb to fired
+		fmt.Println("You're fired.")
+		np := models.GetCurrentPlayer()
+		sj := models.Jorb{Title: "Unemployed", CompanyName: "Nowhere"}
+		np.CurJorb = models.JorbGet(sj)
+		models.UpdateCurrentPlayer(np)
+		models.PlayerJorbUpdate()
 	}
 }
 
@@ -48,16 +49,16 @@ type workTimeAct struct {
 
 var (
 	work = workTimeAct{"Working for the machine.",
-		0,
+		10,
 		models.PlayerMeters{}} //doesn't pull them in at start
 	sleep1 = workTimeAct{"Getting paid to nap. The perfect crime.",
-		80,
-		models.PlayerMeters{Energy: 15}}
+		70,
+		models.PlayerMeters{Energy: 25}}
 )
 
 //need this
 func setWorkAct() {
-	work.deltameters = models.GetJorb().Impact.ImpactMeters
+	work.deltameters = models.GetCurJorb().Impact.ImpactMeters
 }
 
 type freeTimeAct struct {
@@ -91,9 +92,9 @@ var (
 		models.PlayerStats{Stuff: 20}, //mins
 		models.PlayerTraits{Independence: 10},
 		models.PlayerMeters{Energy: 10},
-		models.PlayerStats{Brands: 10}, //impact
+		models.PlayerStats{Brands: 5}, //impact
 		models.PlayerTraits{},
-		models.PlayerMeters{Energy: 5, Stress: -10, Hygiene: -5}}
+		models.PlayerMeters{Energy: 5, Stress: -20, Hygiene: -20}} //for testing
 	sleep = freeTimeAct{"Sleep",
 		"ZZZZZZZZZZZZ",
 		2,
@@ -102,8 +103,8 @@ var (
 		models.PlayerTraits{Alcoholism: 90, Independence: 10}, //need a drink to sleep
 		models.PlayerMeters{},
 		models.PlayerStats{}, //impact
-		models.PlayerTraits{Beauty: 10, Smooth: 5},
-		models.PlayerMeters{Energy: 30, Stress: -15, Hygiene: 5, Soul: 1}}
+		models.PlayerTraits{Beauty: 5, Smooth: 5},
+		models.PlayerMeters{Energy: 40, Stress: -20, Hygiene: 5, Soul: 1}}
 	party = freeTimeAct{"Party", //too vague, and not something that can be done alone. Only good for testing
 		"Party!",
 		1,
@@ -113,7 +114,17 @@ var (
 		models.PlayerMeters{Energy: 20, Stress: 80},
 		models.PlayerStats{Connections: 5}, //impact
 		models.PlayerTraits{Alcoholism: 10, Smooth: 5},
-		models.PlayerMeters{Energy: -30, Stress: -10, Hygiene: -15, Soul: 1}}
+		models.PlayerMeters{Energy: -30, Stress: -10, Hygiene: -25, Soul: 1}}
+	shower = freeTimeAct{"Shower",
+		"Scrub scrub scrub",
+		1,
+		0,
+		models.PlayerStats{Stuff: 5}, //mins
+		models.PlayerTraits{},
+		models.PlayerMeters{},
+		models.PlayerStats{}, //impact
+		models.PlayerTraits{},
+		models.PlayerMeters{Energy: -5, Stress: -15, Hygiene: 40}}
 )
 
 //FreeTimeActions determines actions in freetime
@@ -139,13 +150,19 @@ func FreeTimeActions() ([]string, int) {
 		for _, v := range dList {
 			options = append(options, v.Name)
 		}
+		fmt.Println("You are in the ", models.DistrictGetByLoc(models.GetPlayerLoc()).Name, "district.")
 		fmt.Println("Where would you like to go?")
+	case 4:
+		options = []string{"Quit Game", "Quit this menu"}
+		if models.GetCurJorb().Title != "Unemployed" {
+			options = append(options, "Quit Job")
+		}
 	}
 	return options, m1
 }
 
 func freeMenu() int {
-	options := []string{"Meet People", "Maintenance", "Movement"}
+	options := []string{"Meet People", "Maintenance", "Movement", "Mobility"}
 	r1 := inputs.StringarrayInput(options)
 	return r1
 }
@@ -187,27 +204,27 @@ func FreeTimeOutcomes(choption string, m1 int) {
 		cp.Loc = nd.Nummer
 		fmt.Println("You go to:", nd.Name)
 		models.UpdateCurrentPlayer(cp)
+	case 4:
+		switch choption {
+		case "Quit Job":
+			fmt.Println("You quit your job.")
+			np := models.GetCurrentPlayer()
+			sj := models.Jorb{Title: "Unemployed", CompanyName: "Nowhere"}
+			np.CurJorb = models.JorbGet(sj)
+			models.UpdateCurrentPlayer(np)
+			models.PlayerJorbUpdate()
+		case "Quit Game":
+			models.SetTime([]int{99, 0}, []int{99, 0}) //cheat
+		case "Quit this menu":
+			fmt.Println("Ok")
+		}
 	}
-
-	/*
-		cps.Beauty = cps.Beauty + ftchosen.deltastats.Beauty
-		cps.Brands = cps.Brands + ftchosen.deltastats.Brands
-		cps.Connections = cps.Connections + ftchosen.deltastats.Connections
-		cps.Energy = cps.Energy + ftchosen.deltastats.Energy
-		cps.Experience = cps.Experience + ftchosen.deltastats.Experience
-		cps.Income = cps.Income + ftchosen.deltastats.Income
-		cps.Independence = cps.Independence + ftchosen.deltastats.Independence
-		cps.Knowledge = cps.Knowledge + ftchosen.deltastats.Knowledge
-		cps.Smooth = cps.Smooth + ftchosen.deltastats.Knowledge
-		cps.Stress = cps.Stress + ftchosen.deltastats.Stress
-		cps.Stuff = cps.Stuff + ftchosen.deltastats.Stuff
-		models.UpdatePlayerStats(cps) */
 }
 
 //FreeActList makes a list of valid actions
 func freeActList() []freeTimeAct {
 	//get all possible actions
-	ftlist1 := []freeTimeAct{watchTV, sleep, party} //needs a function
+	ftlist1 := []freeTimeAct{watchTV, sleep, party, shower} //needs a function
 	//need a default action for when nothing else works
 	ftlist2 := []freeTimeAct{}
 	//check time, location, stats

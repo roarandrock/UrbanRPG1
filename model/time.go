@@ -10,7 +10,7 @@ Morning, Daytime, Evening, Night, Midnight, Dawn
 
 Both split into arrays
 Week = 0 weekday, 1 weekend
-Day = 0 Morning- 6 dawn
+Day = 0 Morning- 5 dawn
 */
 
 var currentweek = []int{1, 0}
@@ -48,6 +48,7 @@ func GetFutureTime(n int) ([]int, []int) {
 
 //UpdateTimeofDay moves the day along
 func UpdateTimeofDay() {
+	fmt.Println("Test Time 1: Day, week", currentday, currentweek)
 	currentday[1] = currentday[1] + 1
 	if currentday[1] > 5 {
 		currentday[0]++
@@ -58,6 +59,7 @@ func UpdateTimeofDay() {
 			currentweek[1] = 0
 		}
 	}
+	fmt.Println("Test Time 1: Day, week", currentday, currentweek)
 }
 
 //SetTime sets the time to the time provided
@@ -68,24 +70,27 @@ func SetTime(ct []int, cw []int) {
 
 //ShowTime displays the current time in human text
 func ShowTime() {
-	switch currentweek[1] {
-	case 0:
-		fmt.Println("Weekday")
-	case 1:
-		fmt.Println("Weekend")
-	}
+	var s1 string
 	switch currentday[1] {
 	case 0:
-		fmt.Println("Morning")
+		s1 = "Morning"
 	case 1:
-		fmt.Println("Daytime")
+		s1 = "Daytime"
 	case 2:
-		fmt.Println("Evening")
+		s1 = "Evening"
 	case 3:
-		fmt.Println("Night")
+		s1 = "Night"
 	case 4:
-		fmt.Println("Midnight")
+		s1 = "Midnight"
 	case 5:
-		fmt.Println("Dawn")
+		s1 = "Dawn"
+	}
+	switch currentweek[1] {
+	case 0:
+		//fmt.Println("Weekday")
+		fmt.Printf("It is %s on a weekday.\n", s1)
+	case 1:
+		//fmt.Println("Weekend")
+		fmt.Printf("It is %s on the weekend.\n", s1)
 	}
 }

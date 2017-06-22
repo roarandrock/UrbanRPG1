@@ -37,28 +37,16 @@ func starterFlow() (bool, error) {
 		return cont, err
 	}
 	narrative.Intro()
-	models.SetJorb() //setting up job board
 	models.SetPlayerAll()
+	models.SetJorb()          //setting up job board
+	models.PlayerJorbUpdate() //setting first job impact and schedule
 	//setting up city
 	models.SetCity()
-	//setting up player based on jorb, should be a separate function
-	//traits
-	cpt := models.GetPlayerTraits()
-	cpt.Income = models.GetJorb().Impact.ImpactTraits.Income
-	cpt.Independence = models.GetJorb().Impact.ImpactTraits.Independence
-	models.TraitChange(cpt)
-	//Stats
-	models.StatChange(models.GetJorb().Impact.ImpactStats)
-	//Meters are on a daily basis
-	//update all
-	//setting schedule for job, needs to be implemented when changing jobs
-	models.SetSchedule(models.GetJorb().Schedule)
-
+	models.SetEvents()
 	return cont, err
 }
 
 func gameLoopFlow() (bool, error) {
-
 	//normal day loop
 	dayFlowLoop()
 	_, err := strconv.Atoi("-42") //error cheat
@@ -73,7 +61,7 @@ func dayFlowLoop() {
 	//cpt := models.GetPlayerTraits()
 	//fmt.Println("Test energy", cpm.Energy)
 	//fmt.Println("Test independence", cpt.Independence, cpt)
-	//models.GetJorb(), passes
+	//models.GetCurJorb(), passes
 	//new way
 	getChoices()
 	check.StatZeroCheck()
@@ -88,12 +76,12 @@ func getChoices() {
 	actiontype := 1 //default, free time
 	options := []string{}
 	m1 := 1
-	//fmt.Println("Test schedule", sched)
+	fmt.Println("Test schedule", csched)
 	switch cw[1] {
 	case 0: //weekdays
 		actiontype = csched[cd[1]]
 	case 1: //weekends
-		actiontype = csched[cd[1]+7]
+		actiontype = csched[cd[1]+6]
 	}
 	//work or free
 	switch actiontype {
@@ -101,17 +89,16 @@ func getChoices() {
 		fmt.Println(models.GetenSetSchedEvent("Busy getting ready for work."))
 		options = []string{"OK", "Bummer"}
 	case 1: //free
+		//Unemployed
+		if check.UnemployedCheck() == true {
+			action.UnemployedActions()
+		}
 		options, m1 = action.FreeTimeActions() //implement basic menu now
 	case 2: //work
 		options = action.WorkActions()
 	}
 	//stats events
 	//options = append...
-	//location events
-	if actiontype == 1 {
-		cd := models.DistrictGetByLoc(models.GetPlayerLoc())
-		fmt.Println("You are in:", cd.Name)
-	}
 	//display options
 	r1 := inputs.StringarrayInput(options)
 	switch actiontype {
@@ -119,6 +106,10 @@ func getChoices() {
 		action.FreeTimeOutcomes(options[r1-1], m1) //what to do with more options? Need to handle dynamic options
 	case 2:
 		action.WorkOutcomes(options[r1-1])
+	}
+	//location events
+	if check.EventLocationCheck() == true {
+		action.EventLocationAction()
 	}
 }
 
@@ -130,8 +121,10 @@ func schedulePlanner() { //not used currently
 
 func endOfWeek() {
 	cd, cw := models.GetTime()
-	if cd[1] >= 5 && cw[1] == 1 {
+	if cd[1] == 5 && cw[1] == 1 {
 		fmt.Println("How are you feeling about your life choices?")
+		//resets schedule to Job schedule. cheat, need an exception for Weekday morning?
+		models.SetSchedule(models.GetCurrentPlayer().CurJorb.Schedule)
 	}
 	//look at traits/stats?
 }

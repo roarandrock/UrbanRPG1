@@ -15,9 +15,10 @@ Swing (changing daily like energy, hygience, stress) meters
 
 //Player is base struct
 type Player struct {
-	Name   string
-	Height int
-	Loc    int
+	Name    string
+	Height  int
+	Loc     int
+	CurJorb Jorb
 }
 
 type PlayerStats struct {
@@ -97,16 +98,16 @@ func SetPlayerAll() {
 	currentPlayer.Height = 68
 	currentPlayer.Loc = 1
 	//stats
-	currentPlayerStats.Stuff = 0
-	currentPlayerStats.Brands = 20
-	currentPlayerStats.Knowledge = 20
-	currentPlayerStats.Experience = 0
-	currentPlayerStats.Connections = 10
+	currentPlayerStats.Stuff = 1
+	currentPlayerStats.Brands = 10
+	currentPlayerStats.Knowledge = 1
+	currentPlayerStats.Experience = 1
+	currentPlayerStats.Connections = 5
 	//traits
 	currentPlayerTraits.Alcoholism = 40
 	currentPlayerTraits.Beauty = 50
 	currentPlayerTraits.Education = 50
-	currentPlayerTraits.Income = 0
+	currentPlayerTraits.Income = 1
 	currentPlayerTraits.Independence = 100
 	currentPlayerTraits.Lucky = 20
 	currentPlayerTraits.Smooth = 20
@@ -241,10 +242,70 @@ func MinMeterCheck(minm PlayerMeters) bool {
 func MinTraitCheck(mint PlayerTraits) bool {
 	cpt := GetPlayerTraits()
 	cont := true
+	if cpt.Alcoholism <= mint.Alcoholism { //test, is this backwards?
+		cont = false
+		fmt.Println("You are too much of an alcoholic.")
+	}
+	if cpt.Beauty <= mint.Beauty {
+		cont = false
+		fmt.Println("You are not attractive enough.")
+	}
+	if cpt.Education <= mint.Education {
+		cont = false
+		fmt.Println("You need a better education.")
+	}
 	if cpt.Income <= mint.Income {
 		cont = false
-		fmt.Println("You cannot afford this place.")
-		//fmt.Println("Test: action meters,player meters", minm.Energy, cpm.Energy)
+		fmt.Println("You cannot afford this.")
+	}
+	if cpt.Independence <= mint.Independence {
+		cont = false
+		fmt.Println("You are not free enough for this.")
+	}
+	if cpt.Lucky <= mint.Lucky {
+		cont = false
+		fmt.Println("Bad luck.")
+	}
+	if cpt.Smooth <= mint.Smooth {
+		cont = false
+		fmt.Println("You are not smooth enough.")
 	}
 	return cont
+}
+
+func MinStatCheck(minSt PlayerStats) bool {
+	cps := GetPlayerStats()
+	cont := true
+	if cps.Brands <= minSt.Brands {
+		cont = false
+		fmt.Println("Don't know enough about brands")
+	}
+	if cps.Connections <= minSt.Connections {
+		cont = false
+		fmt.Println("Not enough connections")
+	}
+	if cps.Experience <= minSt.Experience {
+		cont = false
+		fmt.Println("Not enough real world experience")
+	}
+	if cps.Knowledge <= minSt.Knowledge {
+		cont = false
+		fmt.Println("Don't know enough about the city")
+	}
+	if cps.Stuff <= minSt.Stuff {
+		cont = false
+		fmt.Println("You don't have enough stuff")
+	}
+
+	return cont
+}
+
+func PlayerJorbUpdate() {
+	//traits
+	cJ1 := GetCurJorb()
+	TraitChange(cJ1.Impact.ImpactTraits)
+	//Stats
+	StatChange(cJ1.Impact.ImpactStats)
+	//setting schedule for job, needs to be implemented when changing jobs
+	SetSchedule(cJ1.Schedule)
 }

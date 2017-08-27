@@ -16,17 +16,24 @@ type District struct {
 	Place1 FunPlace
 }
 
+//move to funplaces
+type LocationAction struct {
+	Name   string
+	Chance int
+}
+
 type FunPlace struct {
 	Nummer    int
 	Name      string
 	MinTraits PlayerTraits
+	Action1   []LocationAction
 }
 
 var cityMap = map[string]District{}
 
 func SetCity() {
 	//places
-	taco := FunPlace{1, "Taco Feast-a", PlayerTraits{Income: 10}}
+	taco := FunPlace{1, "Taco Feast", PlayerTraits{Income: 10}}
 	pizza := FunPlace{2, "Pizzaholic", PlayerTraits{Income: 30}}
 	//districts
 	West := District{1, "West", taco}

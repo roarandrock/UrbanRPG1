@@ -11,7 +11,88 @@ Morning, Daytime, Evening, Night, Midnight, Dawn
 Both split into arrays
 Week = 0 weekday, 1 weekend
 Day = 0 Morning- 5 dawn
+
+New sleep plan:
+SleepMeter
+6PM-6AM
+At a certain time, player chooses to sleep and this determines how much sleep they get
+Condenses everything to a Friday night...kind of. Two options - Night (6PM-6AM), Day (Everything else)
+
 */
+
+type TimeMeter struct {
+	DayN    int //counts days passed
+	DayType int //1 = day time, 2 = night time
+	CTime   int //18-30(6AM, 24+6), with 0.25 increments
+}
+
+var currentTime = TimeMeter{}
+
+func UpdateTime(dt TimeMeter) {
+	currentTime = dt
+}
+
+func UpdateTimeHour(dH int) bool {
+	sameday := true
+	nt := GetTime()
+	nt.CTime = nt.CTime + dH
+	if nt.CTime > 30 {
+		nt.CTime = 18
+		nt.DayN++
+		nt.DayType = 1
+		sameday = false
+	}
+	UpdateTime(nt)
+	return sameday
+}
+
+func GetTime() TimeMeter {
+	ct := currentTime
+	return ct
+}
+
+func InitTime() {
+	nt := GetTime()
+	nt.CTime = 18
+	nt.DayType = 2
+	nt.DayN = 1
+	UpdateTime(nt)
+}
+
+func SleepTime() int {
+	ct := GetTime()
+	sH := 30 - ct.CTime
+	ct.CTime = 18
+	ct.DayN++
+	ct.DayType = 2 //cheating
+	UpdateTime(ct)
+	return sH
+}
+
+func ShowTime() {
+	ct := GetTime()
+	switch ct.DayType {
+	case 1:
+		fmt.Println("It is daytime.")
+	case 2:
+		fmt.Println("Welcome to the night.")
+		switch { //18-30
+		case ct.CTime < 21:
+			fmt.Println("It is sunset.")
+		case ct.CTime < 24:
+			fmt.Println("It is late.")
+		case ct.CTime < 27:
+			fmt.Println("It is twilight.")
+		default:
+			fmt.Println("It is dawn.")
+		}
+	}
+	fmt.Println("You have been in the city for", ct.DayN, "days")
+	fmt.Println("Test:", ct)
+}
+
+/*
+old time keeping
 
 var currentweek = []int{1, 0}
 var currentday = []int{1, 0}
@@ -94,3 +175,4 @@ func ShowTime() {
 		fmt.Printf("It is %s on the weekend.\n", s1)
 	}
 }
+*/

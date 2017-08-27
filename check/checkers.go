@@ -16,8 +16,8 @@ func ErrorCheck(err error) {
 //GameEndCheck checks for end conditions
 func GameEndCheck() bool {
 	cont := goalAchievedCheck()
-	_, cw := models.GetTime()
-	if cw[0] >= 10 {
+	ct := models.GetTime()
+	if ct.DayN >= 10 {
 		cont = false
 	}
 	return cont
@@ -52,23 +52,29 @@ func StatZeroCheck() bool {
 	if cpm.Energy <= 0 {
 		fmt.Println("You have no energy.")
 		fmt.Println("You pass out, unconcious.")
-		cd, cw := models.GetFutureTime(1)
-		models.UpdateSchedPerTime(cd, cw, 0)
-		models.GetenSetSchedEvent("You went too far, too hard. Need rest.")
+		/*
+			cd, cw := models.GetFutureTime(1)
+			models.UpdateSchedPerTime(cd, cw, 0)
+			models.GetenSetSchedEvent("You went too far, too hard. Need rest.")
+		*/
 		cpm.Energy = 50
 	}
 	if cpm.Stress >= 100 {
 		fmt.Println("You are so stressed you suffer a breakdown.")
-		cd, cw := models.GetFutureTime(1)
-		models.UpdateSchedPerTime(cd, cw, 0)
-		models.GetenSetSchedEvent("You need time to recover.")
+		/*
+			cd, cw := models.GetFutureTime(1)
+			models.UpdateSchedPerTime(cd, cw, 0)
+			models.GetenSetSchedEvent("You need time to recover.")
+		*/
 		cpm.Stress = 1
 	}
 	if cpm.Hygiene <= 0 {
 		fmt.Println("You are a filthy animal. You are quarantined in your apartment.")
-		cd, cw := models.GetFutureTime(1)
-		models.UpdateSchedPerTime(cd, cw, 0)
-		models.GetenSetSchedEvent("You need extra time to clean yourself. So dirty.")
+		/*
+			cd, cw := models.GetFutureTime(1)
+			models.UpdateSchedPerTime(cd, cw, 0)
+			models.GetenSetSchedEvent("You need extra time to clean yourself. So dirty.")
+		*/
 		cpm.Hygiene = 5
 	}
 	if cpt.Independence <= 0 {

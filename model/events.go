@@ -38,6 +38,7 @@ func EventGetByName(c string) EventRandom {
 	return i
 }
 
+//none of these right now
 func EventGetByLoc(l int) []EventRandom {
 	cm := eventRMap
 	cd := []EventRandom{}
